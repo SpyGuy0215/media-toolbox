@@ -43,6 +43,22 @@ async def download_media(fileID: str, filename: str):
         print("Error downloading file:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post('/deletemedia')
+async def delete_media(fileID: str):
+    try:
+        dir_path = f'./media/{fileID}'
+        if not os.path.exists(dir_path):
+            raise HTTPException(status_code=404, detail="File not found")
+        for filename in os.listdir(dir_path):
+            file_path = os.path.join(dir_path, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+        os.rmdir(dir_path)
+        return {"status": "success", "message": "File deleted successfully"}
+    except Exception as e:
+        print("Error deleting file:", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.websocket("/changeformat")
 async def change_format(websocket: WebSocket):
