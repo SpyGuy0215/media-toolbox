@@ -1,0 +1,13 @@
+[project]
+name = "media-toolbox"
+version = "0.1.0"
+description = "A versatile media processing API for images, videos, and audio files."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.116.1",
+    "ffmpeg-python==0.2.0",
+    "pillow==11.3.0",
+    "python-multipart==0.0.20",
+    "uvicorn>=0.35.0",
+    "websockets==15.0.1",
+]
