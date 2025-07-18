@@ -161,7 +161,21 @@ def get_media_type(filename):
 async def transcribe_file(websocket: WebSocket, fileID, filename, model, language, output_format):
     filepath = f"./media/{fileID}/{filename}"
     filename_without_ext = filename.rsplit('.', 1)[0]
-    output_path = f"./media/{fileID}/{filename_without_ext}.{output_format}"
+
+    if language != "en" and model != "tiny":
+        await websocket.send_json(
+            {"status": "error", "message": "Only tiny models are supported for non-English languages"})
+        return
+
+    if language != "en" and "en" in model:
+        await websocket.send_json(
+            {"status": "error", "message": "English model cannot transcribe non-English languages"})
+        return
+
+    if language == 'en':
+        MODEL_TIMEOUT = 60
+    else:
+        MODEL_TIMEOUT = 120
 
     print(f"Transcribing {filepath} using model {model} and language {language}")
     try:
@@ -169,8 +183,10 @@ async def transcribe_file(websocket: WebSocket, fileID, filename, model, languag
         queue: asyncio.Queue = asyncio.Queue()
         loop = asyncio.get_running_loop()
         executor = ThreadPoolExecutor(max_workers=1)
+        print("Setting up transcription with Whisper model...")
 
         def progress_callback(progress):
+            print("Progress callback:", progress)
             queue.put_nowait({"status": "progress", "progress": progress})
 
         task = loop.run_in_executor(
@@ -178,12 +194,17 @@ async def transcribe_file(websocket: WebSocket, fileID, filename, model, languag
             lambda: model.transcribe(filepath, verbose=False, language=language, progress_callback=progress_callback)
         )
 
+        await websocket.send_json({"status": "progress", "message": "Transcription started", "progress": 0.0})
         while True:
-            update = await queue.get()
-            await websocket.send_json(update)
-            await asyncio.sleep(0.1)  # Avoid busy waiting
-            if update.get("status") == "progress" and update.get("progress") == 100.0:
-                break
+            try:
+                print("Waiting for transcription updates...")
+                update = await asyncio.wait_for(queue.get(), timeout=MODEL_TIMEOUT)
+                await websocket.send_json(update)
+                await asyncio.sleep(0.1)  # Avoid busy waiting
+                if update.get("status") == "progress" and update.get("progress") == 100.0:
+                    break
+            except asyncio.TimeoutError:
+                await websocket.send_json({"status": "error", "message": f"Transcription timeout ({MODEL_TIMEOUT}s without updates)"})
 
         result = await task
         writer = whisper.utils.get_writer(output_format, f'./media/{fileID}/')
