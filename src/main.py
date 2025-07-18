@@ -5,7 +5,7 @@ from fastapi import FastAPI, UploadFile, HTTPException, WebSocket
 from fastapi.responses import FileResponse
 from starlette.websockets import WebSocketDisconnect
 
-from src.helper import change_file_format, transcribe_file
+from src.helper import change_file_format, transcribe_file, transcribe_file_fast
 
 app = FastAPI()
 
@@ -102,4 +102,25 @@ async def transcribe(websocket: WebSocket):
         await websocket.close(1000, "WebSocket closed")
     except Exception as e:
         print("Error in transcription WebSocket connection:", str(e))
+        await websocket.close(1011, "Internal Server Error")
+
+@app.websocket("/transcribe-fast")
+async def transcribe_fast(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_json()
+            print("Received data for fast transcription:", data)
+            filename = data["filename"]
+            fileID = data["fileID"]
+            model = data.get("model", "base")
+            output_format = data.get("output_format", "srt")
+            print(f"Fast transcribing {filename} ({fileID}) using model {model}")
+            await transcribe_file_fast(websocket, fileID, filename, model, output_format)
+
+    except WebSocketDisconnect:
+        print("WebSocket disconnected during fast transcription")
+        await websocket.close(1000, "WebSocket closed")
+    except Exception as e:
+        print("Error in fast transcription WebSocket connection:", str(e))
         await websocket.close(1011, "Internal Server Error")

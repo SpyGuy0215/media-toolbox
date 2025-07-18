@@ -4,6 +4,8 @@ import ffmpeg
 from PIL import Image, features
 from pillow_heif import register_heif_opener
 import whisper.utils
+from faster_whisper import WhisperModel
+import pysubs2 as pysubs
 from fastapi import WebSocket
 import mimetypes
 import asyncio
@@ -172,6 +174,11 @@ async def transcribe_file(websocket: WebSocket, fileID, filename, model, languag
             {"status": "error", "message": "English model cannot transcribe non-English languages"})
         return
 
+    if model not in ["tiny", "tiny.en", "base", "base.en", "small", "small.en"]:
+        await websocket.send_json(
+            {"status": "error", "message": f"Unsupported model: {model}. Supported models are: tiny, tiny.en, base, base.en, small, small.en"})
+        return
+
     if language == 'en':
         MODEL_TIMEOUT = 60
     else:
@@ -204,11 +211,58 @@ async def transcribe_file(websocket: WebSocket, fileID, filename, model, languag
                 if update.get("status") == "progress" and update.get("progress") == 100.0:
                     break
             except asyncio.TimeoutError:
-                await websocket.send_json({"status": "error", "message": f"Transcription timeout ({MODEL_TIMEOUT}s without updates)"})
+                await websocket.send_json(
+                    {"status": "error", "message": f"Transcription timeout ({MODEL_TIMEOUT}s without updates)"})
 
         result = await task
         writer = whisper.utils.get_writer(output_format, f'./media/{fileID}/')
         writer(result, filepath)
+        await websocket.send_json(
+            {"status": "success", "message": f"Transcription completed: {filename_without_ext}.{output_format}",
+             "filename": f"{filename_without_ext}.{output_format}"})
+
+    except Exception as e:
+        print("Error during transcription:", str(e))
+        await websocket.send_json({"status": "error", "message": str(e)})
+        return
+
+
+async def transcribe_file_fast(websocket: WebSocket, fileID, filename, model, output_format):
+    filepath = f"./media/{fileID}/{filename}"
+    filename_without_ext = filename.rsplit('.', 1)[0]
+
+    # if language != "en" and model != "tiny":
+    #     await websocket.send_json(
+    #         {"status": "error", "message": "Only tiny models are supported for non-English languages"})
+    #     return
+
+    if model not in ["tiny", "tiny.en", "base", "base.en", "small", "small.en"]:
+        await websocket.send_json(
+            {"status": "error", "message": f"Unsupported model: {model}. Supported models are: tiny, tiny.en, base, base.en, small, small.en"})
+        return
+
+    print(f"Transcribing {filepath} using model {model} and CTranslate2")
+    try:
+        model = WhisperModel(model, device="cpu", compute_type="int8")
+        segments, info = model.transcribe(filepath, beam_size=2, log_progress=True)  # this is just a generator
+        print(f"Detected language: {info.language} with probability {info.language_probability*100}%, "
+              f"duration: {info.duration} seconds")
+        # actually run the generation to create transcription segments
+        res = []
+        for s in segments:
+            seg_dict = {
+                "start": s.start,
+                "end": s.end,
+                "text": s.text
+            }
+            res.append(seg_dict)
+
+            percent = min(100, (s.end / info.duration) * 100)
+            await websocket.send_json({"status": "progress", "progress": percent})
+        await websocket.send_json({"status": "progress", "progress": 100.0})
+        subs = pysubs.load_from_whisper(res)
+        output_path = f"./media/{fileID}/{filename_without_ext}.{output_format}"
+        subs.save(output_path)
         await websocket.send_json(
             {"status": "success", "message": f"Transcription completed: {filename_without_ext}.{output_format}",
              "filename": f"{filename_without_ext}.{output_format}"})

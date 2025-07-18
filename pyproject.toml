@@ -5,9 +5,12 @@ description = "A versatile media processing API for images, videos, and audio fi
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.116.1",
+    "faster-whisper==1.1.1",
     "ffmpeg-python==0.2.0",
+    "numpy==2.2.6",
     "pillow==11.3.0",
     "pillow-heif==1.0.0",
+    "pysubs2==1.8.0",
     "python-multipart==0.0.20",
     "uvicorn>=0.35.0",
     "websockets==15.0.1",
