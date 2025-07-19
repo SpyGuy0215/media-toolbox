@@ -133,6 +133,18 @@ wheels = [
 ]
 
 [[package]]
+name = "cronitor"
+version = "4.7.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "humanize" },
+    { name = "pyyaml" },
+    { name = "requests" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4c/65/249875d610cb5d9bd19ec2a045e194bafd15000581f1a73c99594479b7be/cronitor-4.7.1.tar.gz", hash = "sha256:46acf135f610f888e2d19c6a61f1c9b6f4fd52758f078e8d346d6acc0492e0b5", size = 17075, upload-time = "2024-04-18T15:59:07.458Z" }
+
+[[package]]
 name = "ctranslate2"
 version = "4.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -317,6 +329,15 @@ wheels = [
 ]
 
 [[package]]
+name = "humanize"
+version = "4.12.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/22/d1/bbc4d251187a43f69844f7fd8941426549bbe4723e8ff0a7441796b0789f/humanize-4.12.3.tar.gz", hash = "sha256:8430be3a615106fdfceb0b2c1b41c4c98c6b0fc5cc59663a5539b111dd325fb0", size = 80514, upload-time = "2025-04-30T11:51:07.98Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a0/1e/62a2ec3104394a2975a2629eec89276ede9dbe717092f6966fcf963e1bf0/humanize-4.12.3-py3-none-any.whl", hash = "sha256:2cbf6370af06568fa6d2da77c86edb7886f3160ecd19ee1ffef07979efc597f6", size = 128487, upload-time = "2025-04-30T11:51:06.468Z" },
+]
+
+[[package]]
 name = "idna"
 version = "3.10"
 source = { registry = "https://pypi.org/simple" }
@@ -410,11 +431,13 @@ dependencies = [
     { name = "certifi" },
     { name = "charset-normalizer" },
     { name = "colorama" },
+    { name = "cronitor" },
     { name = "fastapi" },
     { name = "faster-whisper" },
     { name = "ffmpeg-python" },
     { name = "filelock" },
     { name = "fsspec" },
+    { name = "humanize" },
     { name = "idna" },
     { name = "jinja2" },
     { name = "llvmlite" },
@@ -428,6 +451,7 @@ dependencies = [
     { name = "pillow" },
     { name = "pillow-heif" },
     { name = "pysubs2" },
+    { name = "python-dotenv" },
     { name = "python-multipart" },
     { name = "regex" },
     { name = "requests" },
@@ -453,11 +477,14 @@ requires-dist = [
     { name = "certifi", specifier = "==2024.8.30" },
     { name = "charset-normalizer", specifier = "==3.4.0" },
     { name = "colorama", specifier = "==0.4.6" },
+    { name = "cronitor", specifier = "==4.7.1" },
+    { name = "cronitor", specifier = ">=4.7.1" },
     { name = "fastapi", specifier = ">=0.116.1" },
     { name = "faster-whisper", specifier = "==1.1.1" },
     { name = "ffmpeg-python", specifier = "==0.2.0" },
     { name = "filelock", specifier = "==3.16.1" },
     { name = "fsspec", specifier = "==2024.10.0" },
+    { name = "humanize", specifier = "==4.12.3" },
     { name = "idna", specifier = "==3.10" },
     { name = "jinja2", specifier = "==3.1.4" },
     { name = "llvmlite", specifier = "==0.44.0" },
@@ -471,6 +498,8 @@ requires-dist = [
     { name = "pillow", specifier = "==11.3.0" },
     { name = "pillow-heif", specifier = "==1.0.0" },
     { name = "pysubs2", specifier = "==1.8.0" },
+    { name = "python-dotenv", specifier = "==1.1.1" },
+    { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "python-multipart", specifier = "==0.0.20" },
     { name = "regex", specifier = "==2024.9.11" },
     { name = "requests", specifier = "==2.32.3" },
@@ -948,6 +977,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/08/ba/45911d754e8eba3d5a841a5ce61a65a685ff1798421ac054f85aa8747dfb/pytest-8.4.1.tar.gz", hash = "sha256:7c67fd69174877359ed9371ec3af8a3d2b04741818c51e5e99cc1742251fa93c", size = 1517714, upload-time = "2025-06-18T05:48:06.109Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/29/16/c8a903f4c4dffe7a12843191437d7cd8e32751d5de349d45d3fe69544e87/pytest-8.4.1-py3-none-any.whl", hash = "sha256:539c70ba6fcead8e78eebbf1115e8b589e7565830d7d006a8723f19ac8a0afb7", size = 365474, upload-time = "2025-06-18T05:48:03.955Z" },
+]
+
+[[package]]
+name = "python-dotenv"
+version = "1.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f6/b0/4bc07ccd3572a2f9df7e6782f52b0c6c90dcbb803ac4a167702d7d0dfe1e/python_dotenv-1.1.1.tar.gz", hash = "sha256:a8a6399716257f45be6a007360200409fce5cda2661e3dec71d23dc15f6189ab", size = 41978, upload-time = "2025-06-24T04:21:07.341Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5f/ed/539768cf28c661b5b068d66d96a2f155c4971a5d55684a514c1a0e0dec2f/python_dotenv-1.1.1-py3-none-any.whl", hash = "sha256:31f23644fe2602f88ff55e1f5c79ba497e01224ee7737937930c448e4d0e24dc", size = 20556, upload-time = "2025-06-24T04:21:06.073Z" },
 ]
 
 [[package]]
